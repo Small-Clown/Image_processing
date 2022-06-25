@@ -1,25 +1,20 @@
 #ifndef IMAGE_PROCESSOR_IMPROC_HPP
 #define IMAGE_PROCESSOR_IMPROC_HPP
-
 #include "bitmap.h"
 #include <vector>
 #include <cstring>
 #include <memory>
 #include <string>
 #include <functional>
-
 #define ARRAY_2D 1
 #define VECTOR_OF_VECTORS 2
 #define MATRIX_DATA_TYPE 1
-
 template<typename T>
-
 #if MATRIX_DATA_TYPE == 1
 using MatrixData = T**;
 #else
 using MatrixData = std::vector<std::vector<T>>;
 #endif
-
 template<typename  T>
 class Matrix{
 public:
@@ -110,7 +105,7 @@ public:
     ~Image() = default;
 };
 
-enum ImagePrintMode { CHARS, NUMS};
+enum ImagePrintMode {CHARS, NUMS};
 std::string to_string(const Image& im, ImagePrintMode mode);
 using Mask = Matrix<double>;
 Image transform(const Image& im_in, std::function<byte(byte)> func);

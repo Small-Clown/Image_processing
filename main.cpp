@@ -5,15 +5,13 @@
 
 int main(void) {
     // FIXME: Replace it with the absolute path to an existing image.
-    const char* input_filepath = "/home/image_processor/imgs/lena_128.bmp";
+    const char* input_filepath = "C:/Users/jerem/CLionProject/improc/imgs/lena_128.bmp";
     // FIXME: Replace it with the absolute path to an existing image.
-    const char* output_filepath = "/home/image_processor/imgs/lena_128__out.bmp";
+    const char* output_filepath = "C:/Users/jerem/CLionProject/improc/imgs/lena_128__out.bmp";
 
     BITMAPINFO* bitmap_info = NULL;
     byte** image_array = load_bitmap(input_filepath, &bitmap_info);
     save_bitmap(output_filepath, image_array, bitmap_info);
-
-    // Cleanup.
 
     int h = bitmap_info->bmiHeader.biHeight;
 

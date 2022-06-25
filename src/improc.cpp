@@ -66,17 +66,17 @@ extern int save_bitmap(const std::string& filename, const Image& image){
     return status;
 }
 
-std::string to_string(const Image& im, ImagePrintMode mode){
+std::string to_string(const Image& image, ImagePrintMode printType){
     std::ostringstream print;
-    for(std::size_t r = 0; r < im.get_nrows(); r++){
-        for(std::size_t c = 0; c < im.get_ncols(); c++){
-            if(mode == CHARS){
-                print << (char) im[r][c];
+    for(std::size_t rows = 0; rows < image.get_nrows(); rows++){
+        for(std::size_t colls = 0; colls < image.get_ncols(); colls++){
+            if(printType == CHARS){
+                print << (char) image[rows][colls];
             }else{
-                print << std::setw(4) << (int) im[r][c];
+                print << std::setw(4) << (int) image[rows][colls];
             }
         }
-        if(r < im.get_nrows() -1){
+        if(rows < image.get_nrows() -1){
             print << std::endl;
         }
     }
@@ -84,13 +84,13 @@ std::string to_string(const Image& im, ImagePrintMode mode){
 }
 
 Image transform(const Image& im_in, std::function<byte(byte)> func){
-    Image processed(im_in);
-    for(std::size_t r = 0; r < processed.get_nrows(); r++){
-        for(std::size_t c = 0; c < processed.get_ncols(); c++) {
-            processed[r][c] = func(processed[r][c]);
+    Image finished(im_in);
+    for(std::size_t row = 0; row < finished.get_nrows(); row++){
+        for(std::size_t collumn = 0; collumn < finished.get_ncols(); collumn++) {
+            finished[row][collumn] = func(finished[row][collumn]);
         }
     }
-    return processed;
+    return finished;
 }
 
 Mask get_averaging_mask(std::size_t n){
@@ -98,30 +98,29 @@ Mask get_averaging_mask(std::size_t n){
 }
 
 Image filter(const Image& im_in, const Mask& mask){
-    Image processed(im_in);
-    std::size_t mask_range = (mask.get_ncols() - 1) / 2; // the length at which the maks goes either way e.g. 3x3 -> 1 -> 1 left 1 right 1 top 1 bottom
-    for(std::size_t r = 0; r < processed.get_nrows(); r++){ // r -> the actual rows of the matrix being processed
-        for(std::size_t c = 0; c < processed.get_ncols(); c++){ // c -> the actual columns of the matrix being processed
-            byte sum = 0; //sum that is to be put in each byte (bytes from the averaging mask)
-            for(std::size_t r_m = r; r_m < r + mask.get_nrows(); r_m++){ // r_m -> current row of the mask being iterated over (goes from 0 to length)
-                /// example we start on 3x3 mask so on 1st pixel r_m is 0 and we go to double the range because we then subtract
-                for(std::size_t c_m = c; c_m < c + mask.get_ncols(); c_m++){ // c_m current column of the mask being iterated over (from 0 to length)
-                    std::size_t pixel_value; //value of the pixel that is to be assigned
-                    if(r_m < mask_range || r_m + 1 > processed.get_nrows() + mask_range || c_m < mask_range || c_m + 1> processed.get_ncols() + mask_range) {
-                        // 1st condition is [-range + iter >= 0] transformed and negated (left overflow)
-                        // 2nd condition is [iter - range < length] negated and transformed (right overflow)
-                        // 3rd condition is 1st condition but on columns (top overflow)
-                        // 4th condition is 2nd condition but on columns (bottom overflow)
+    Image finished(im_in);
+    std::size_t mask_range = (mask.get_ncols() - 1) / 2;
+    for(std::size_t row = 0; row < finished.get_nrows(); row++){
+        for(std::size_t collumn = 0; collumn < finished.get_ncols(); collumn++){
+            byte sum = 0;
+
+
+            for(std::size_t r_m = row; r_m < row + mask.get_nrows(); r_m++){
+                for(std::size_t c_m = collumn; c_m < collumn + mask.get_ncols(); c_m++){
+                    std::size_t pixel_value;
+                    if(r_m + 1 > finished.get_nrows() + mask_range || c_m + 1> finished.get_ncols() + mask_range  || c_m < mask_range || r_m < mask_range) { // handles out of bounds exceptions
                         pixel_value = 0;
                     }else {
                         pixel_value = im_in[r_m - mask_range][c_m - mask_range];
                     }
 
-                    sum += (byte) ((double) pixel_value * mask[r_m - r][c_m - c]);
+                    sum += (byte) ((double) pixel_value * mask[r_m - row][c_m - collumn]);
                 }
             }
-            processed[r][c] = sum;
+
+
+            finished[row][collumn] = sum;
         }
     }
-    return processed;
+    return finished;
 }
